@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 
-import { calculateCarRent } from "@utils/utils";
+import { calculateCarRent, generateCarImageUrl } from "@utils/utils";
 import { CarProps } from "@/types/types";
 import CustomButton from "./CustomButton";
 import CarDetails from "./CarDetails";
@@ -17,7 +17,11 @@ const CarCard = ({ car }: CarCardProps) => {
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const carRent = calculateCarRent(city_mpg, year);
+  /* message for reader: some functions from api are available only for premium dudes, so i'll go with 'conditions'  */
+  const carRent = calculateCarRent(
+    typeof city_mpg === "string" ? 69 : city_mpg,
+    year
+  );
 
   return (
     <div className="car-card group">
@@ -39,7 +43,7 @@ const CarCard = ({ car }: CarCardProps) => {
 
       <div className="relative w-full h-40 my-3 object-contain">
         <Image
-          src="/hero.png"
+          src={generateCarImageUrl(car)}
           alt="car model"
           fill
           priority
@@ -66,7 +70,9 @@ const CarCard = ({ car }: CarCardProps) => {
           </div>
           <div className="car-card__icon">
             <Image src="/gas.svg" width={20} height={20} alt="seat" />
-            <p className="car-card__icon-text">{city_mpg} MPG</p>
+            <p className="car-card__icon-text">
+              {typeof city_mpg === "string" ? 69 : city_mpg} MPG
+            </p>
           </div>
         </div>
 
