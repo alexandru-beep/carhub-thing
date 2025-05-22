@@ -1,5 +1,8 @@
 import { CarProps } from "@/types/types";
+import { FilterProps } from "@/types/types";
 import { resourceLimits } from "worker_threads";
+import dotenv from "dotenv";
+dotenv.config();
 
 export const calculateCarRent = (city_mpg: number, year: number) => {
   const basePricePerDay = 50;
@@ -14,8 +17,10 @@ export const calculateCarRent = (city_mpg: number, year: number) => {
   return rentalRatePerDay.toFixed(0);
 };
 
-export async function fetchCars() {
-  const url = "https://cars-by-api-ninjas.p.rapidapi.com/v1/cars?model=corolla";
+export async function fetchCars(filters: FilterProps) {
+  // limit didn't provide, look ./page.tsx for details ⚠️
+  const { manufacturer, year, model, fuel } = filters;
+  const url = `https://cars-by-api-ninjas.p.rapidapi.com/v1/cars?make=${manufacturer}&year=${year}&model=${model}&fuel_type=${fuel}`;
   const options = {
     method: "GET",
     headers: {
@@ -34,10 +39,7 @@ export const generateCarImageUrl = (car: CarProps, angle?: string) => {
   const url = new URL("https://cdn.imagin.studio/getimage");
   const { make, model, year } = car;
 
-  url.searchParams.append(
-    "customer",
-    process.env.NEXT_PUBLIC_IMAGIN_API_KEY || "imagejavascript-model"
-  );
+  url.searchParams.append("customer", "img");
   url.searchParams.append("make", make);
   url.searchParams.append("modelFamily", model.split(" ")[0]);
   url.searchParams.append("zoomType", "fullscreen");
@@ -45,4 +47,14 @@ export const generateCarImageUrl = (car: CarProps, angle?: string) => {
   url.searchParams.append("angle", `${angle}`);
 
   return `${url}`;
+};
+
+export const updateSearchParams = (type: string, value: string) => {
+  const searchParams = new URLSearchParams(window.location.search);
+
+  searchParams.set(type, value);
+
+  const newPathname = `${window.location.pathname}?${searchParams.toString()}`;
+
+  return newPathname;
 };

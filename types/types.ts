@@ -28,6 +28,7 @@ export interface CarProps {
   model: string;
   transmission: string;
   year: number;
+  angle?: string;
   [key: string]: any;
 }
 
@@ -39,4 +40,12 @@ export interface CustomFilterProps {
 export interface OptionProps {
   title: string;
   value: string;
+}
+
+export interface FilterProps {
+  manufacturer?: string;
+  year?: number;
+  model?: string;
+  limit?: number;
+  fuel?: string;
 }

@@ -7,7 +7,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
 const SearchButton = ({ otherClasses }: { otherClasses: string }) => (
-  <button type="submit" className={`-ml-3 z-10 ${otherClasses}`}>
+  <button type="submit" className={`z-10 ${otherClasses}`}>
     <Image
       src={"/magnifying-glass.svg"}
       alt={"magnifying glass"}
@@ -27,7 +27,10 @@ const SearchBar = () => {
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (manufacturer.trim() === "" && model.trim() === "") {
+    if (
+      (manufacturer === "" && model === "") ||
+      (manufacturer.trim() === "" && model.trim() === "")
+    ) {
       return alert("Please fill in the search bar");
     }
 
@@ -53,7 +56,7 @@ const SearchBar = () => {
       window.location.pathname
     }?${searchParams.toString()}`;
 
-    router.push(newPathname);
+    router.push(newPathname, { scroll: false });
   };
 
   return (
@@ -63,8 +66,9 @@ const SearchBar = () => {
           manufacturer={manufacturer}
           setManuFacturer={setManuFacturer}
         />
+        {/* fixed position of this annoying search button */}
+        <SearchButton otherClasses="sm:hidden ml-auto" />
       </div>
-      <SearchButton otherClasses="sm:hidden" />
 
       <div className="searchbar__item">
         <Image
