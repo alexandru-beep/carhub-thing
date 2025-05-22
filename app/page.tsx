@@ -1,7 +1,11 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { CarCard, CustomFilter, Hero, SearchBar } from "@components";
 import { fuels, yearsOfProduction } from "@constants/constants";
-import { CarProps, FilterProps } from "@/types/types";
+import { CarProps } from "@/types/types";
 import { fetchCars } from "@utils/utils";
+import Image from "next/image";
 import ShowMore from "@components/ShowMore";
 
 interface PageProps {
@@ -16,17 +20,41 @@ interface PageProps {
   };
 }
 
-export default async function Home({ searchParams }: PageProps) {
-  const allCars = await fetchCars({
-    manufacturer: searchParams.manufacturer || "",
-    year: searchParams.year || 2023,
-    fuel: searchParams.fuel || "",
-    model: searchParams.model || "",
-    // very unfortunate but 'limit' is not available for regular users, so I cannot show only 10 different cars if there is nothing in searchParams or user didn't provide any :(
-    limit: searchParams.limit || 10,
-  });
+export default function Home() {
+  const [allCars, setAllCars] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const isDataEmpty = !Array.isArray(allCars) || allCars.length < 1 || !allCars;
+  const [manufacturer, setManufacturer] = useState("");
+  const [model, setModel] = useState("");
+
+  const [fuel, setFuel] = useState("");
+  const [year, setYear] = useState(2023);
+
+  const [limit, setLimit] = useState(10);
+
+  const getCars = async () => {
+    setLoading(true);
+    try {
+      const result = await fetchCars({
+        manufacturer: manufacturer || "Audi",
+        year: year || 2023,
+        model: model || "",
+        fuel: fuel || "fuel",
+        // very unfortunate but 'limit' is not available for regular users, so I cannot show only 10 different cars if there is nothing in searchParams or user didn't provide any :(
+        limit: limit || 10,
+      });
+
+      setAllCars(result);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getCars();
+  }, [manufacturer, model, year, limit, fuel]);
 
   return (
     <main className="overflow-hidden">
@@ -40,15 +68,23 @@ export default async function Home({ searchParams }: PageProps) {
       </div>
 
       <div className="home__filters padding-x padding-y">
-        <SearchBar />
+        <SearchBar setManufacturer={setManufacturer} setModel={setModel} />
 
         <div className="home__filter-container">
-          <CustomFilter title="fuel" options={fuels} />
-          <CustomFilter title="year" options={yearsOfProduction} />
+          <CustomFilter
+            title="fuel"
+            options={fuels}
+            setFilter={(value) => setFuel(value)}
+          />
+          <CustomFilter
+            title="year"
+            options={yearsOfProduction}
+            setFilter={(value) => setYear(Number(value))}
+          />
         </div>
       </div>
 
-      {!isDataEmpty ? (
+      {allCars.length > 0 ? (
         <section className="padding-x padding-y">
           <div className="home__cars-wrapper">
             {allCars?.map((car: CarProps) => (
@@ -56,15 +92,28 @@ export default async function Home({ searchParams }: PageProps) {
             ))}
           </div>
 
+          {loading && (
+            <div>
+              {/* <Image
+                src="/loader.svg"
+                alt="loader"
+                width={50}
+                height={50}
+                className="object-contain"
+              /> */}
+              Loading...
+            </div>
+          )}
+
           <ShowMore
-            pageNumber={(searchParams?.pageNumber || 10) / 10}
-            isNext={searchParams?.isNext > 10}
+            pageNumber={limit || 10}
+            isNext={limit > 10}
+            setLimit={setLimit}
           />
         </section>
       ) : (
         <div className="home__error-container">
           <h2 className="text-black text-xl font-bold">Oops, no results</h2>
-          <p>{allCars?.message}</p>
         </div>
       )}
     </main>

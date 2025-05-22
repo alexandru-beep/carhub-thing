@@ -20,6 +20,7 @@ export const calculateCarRent = (city_mpg: number, year: number) => {
 export async function fetchCars(filters: FilterProps) {
   // limit didn't provide, look ./page.tsx for details ⚠️
   const { manufacturer, year, model, fuel } = filters;
+
   const url = `https://cars-by-api-ninjas.p.rapidapi.com/v1/cars?make=${manufacturer}&year=${year}&model=${model}&fuel_type=${fuel}`;
   const options = {
     method: "GET",
@@ -31,7 +32,6 @@ export async function fetchCars(filters: FilterProps) {
 
   const response = await fetch(url, options);
   const result = await response.json();
-  console.log(result);
   return result;
 }
 
